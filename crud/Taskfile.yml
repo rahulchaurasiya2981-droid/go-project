@@ -1,0 +1,68 @@
+version: "3"
+
+# dotenv:
+#   - .env
+
+vars:
+  APP_NAME: server
+  CMD_PATH: ./cmd/server
+  BIN_DIR: ./bin
+  MIGRATIONS_DIR: ./migrations
+
+tasks:
+  run:
+    desc: Run the Go server
+    cmds:
+      - go run {{.CMD_PATH}}
+
+  build:
+    desc: Build the Go server
+    cmds:
+      - go build -o {{.BIN_DIR}}/{{.APP_NAME}}.exe {{.CMD_PATH}}
+
+  test:
+    desc: Run all tests
+    cmds:
+      - go test ./...
+
+  fmt:
+    desc: Format Go code
+    cmds:
+      - go fmt ./...
+
+  vet:
+    desc: Run Go vet
+    cmds:
+      - go vet ./...
+
+  tidy:
+    desc: Clean Go dependencies
+    cmds:
+      - go mod tidy
+
+  check:
+    desc: Run format, vet and tests
+    cmds:
+      - go fmt ./...
+      - go vet ./...
+      - go test ./...
+
+  migrate-up:
+    desc: Run all database migrations
+    cmds:
+      - go run ./cmd/migrate up
+
+  migrate-down:
+    desc: Rollback the last database migration
+    cmds:
+      - go run ./cmd/migrate down 1
+
+  migrate-down-all:
+    desc: Rollback all database migrations
+    cmds:
+      - go run ./cmd/migrate down
+
+  clean:
+    desc: Remove build files
+    cmds:
+      - powershell -Command "if (Test-Path '{{.BIN_DIR}}') { Remove-Item '{{.BIN_DIR}}' -Recurse -Force }"
