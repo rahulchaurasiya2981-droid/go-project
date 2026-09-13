@@ -6,6 +6,7 @@ version: "3"
 vars:
   APP_NAME: server
   CMD_PATH: ./cmd/server
+  MIGRATE_CMD_PATH: ./cmd/migrate
   BIN_DIR: ./bin
   MIGRATIONS_DIR: ./migrations
 
@@ -47,20 +48,25 @@ tasks:
       - go vet ./...
       - go test ./...
 
+  migrate-create:
+    desc: Create a new migration
+    cmds:
+      - go run {{.MIGRATE_CMD_PATH}} create {{.CLI_ARGS}}
+
   migrate-up:
     desc: Run all database migrations
     cmds:
-      - go run ./cmd/migrate up
+      - go run {{.MIGRATE_CMD_PATH}} up
 
   migrate-down:
     desc: Rollback the last database migration
     cmds:
-      - go run ./cmd/migrate down 1
+      - go run {{.MIGRATE_CMD_PATH}} down
 
   migrate-down-all:
     desc: Rollback all database migrations
     cmds:
-      - go run ./cmd/migrate down
+      - go run {{.MIGRATE_CMD_PATH}} down-all --confirm
 
   clean:
     desc: Remove build files
