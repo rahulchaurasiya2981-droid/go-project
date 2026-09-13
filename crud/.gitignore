@@ -1,0 +1,41 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Go build output
+/bin/
+/dist/
+/build/
+
+# Test coverage
+coverage.out
+coverage.html
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+
+# Air live reload
+.air.toml
+
+# Local database/data
+data/
+
+# Go binaries
+*.exe
+*.exe~
+
+test.json
