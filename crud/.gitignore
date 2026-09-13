@@ -38,4 +38,4 @@ data/
 *.exe
 *.exe~
 
-test.json
+temp.json

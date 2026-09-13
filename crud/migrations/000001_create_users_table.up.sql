@@ -7,6 +7,3 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
--- Index for fast user email lookups
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
