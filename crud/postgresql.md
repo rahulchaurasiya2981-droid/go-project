@@ -4,17 +4,23 @@
 
 ## Option 1 — Start/stop manually from CMD
 
+- Check status of DB
+
 ```sql
-sc config postgresql-x64-18 start= demand ---> (now it will start/stop on demand)
-net start postgresql-x64-18 ---> start work
-net stop postgresql-x64-18 --->  stop work
+> sc query postgresql-x64-18
+```
+
+```sql
+> sc config postgresql-x64-18 start= demand ---> (now it will start/stop on demand)
+> net start postgresql-x64-18 ---> start work
+> net stop postgresql-x64-18 --->  stop work
 ```
 
 ## Option 2 — From Powershell
 
 ```sql
-Start-Service postgresql-x64-18
-Stop-Service postgresql-x64-18
+> Start-Service postgresql-x64-18
+> Stop-Service postgresql-x64-18
 ```
 
 ## Check version By CMD
@@ -25,8 +31,9 @@ psql (PostgreSQL) 18.6
 ```
 
 ## Connect to PostgreSQL By CMD
+
 ```sql
 psql -U postgres
 ```
 
-## 
+##

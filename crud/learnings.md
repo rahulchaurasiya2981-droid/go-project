@@ -137,8 +137,7 @@ Go
 
 # Database migrations
 
----
-
+- Database migrations is management of incremental,reversible changes to relational database schemas.
 - It is used the creat or intialize the tables in Database (if table not exist it will create)
 - go long support database migration with using below librarby
 
@@ -206,6 +205,14 @@ crud_db=# SELECT * FROM schema_migrations;
               │
               └── Rollback migration
 ```
+
+## Database Migration Rollback Guard
+
+---
+
+- m.Down() : will rollback enitre migration (means drop all tables in database)
+- is very dangerous to drop all table from production database
+- so we use m.Step(-1)`
 
 # Project Flow
 
