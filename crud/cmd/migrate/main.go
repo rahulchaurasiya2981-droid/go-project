@@ -21,12 +21,10 @@ const (
 	migrationsPath   = "file://migrations"
 	migrationsDir    = "./migrations"
 	migrationCommand = "./cmd/migrate"
-	timestampFmt     = "20060102150405"
 )
 
 func main() {
 	fmt.Println("MIGRATE CLI STARTED")
-	fmt.Println("timestamp format:", timestampFmt)
 
 	if len(os.Args) < 2 {
 		usage()
@@ -87,7 +85,7 @@ func createMigration(args []string) {
 		os.Exit(1)
 	}
 
-	timestamp := time.Now().UTC().Format(timestampFmt)
+	timestamp := time.Now().UTC()
 
 	upFile := filepath.Join(
 		migrationsDir,

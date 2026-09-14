@@ -85,7 +85,7 @@ func Load() (*Config, error) {
 	cfg := &Config{
 		AppEnv:   os.Getenv("APP_ENV"),
 		LogLevel: os.Getenv("LOG_LEVEL"),
-		Port:     os.Getenv("PORT"),
+		Port:     ":" + os.Getenv("PORT"),
 		Database: dbConfig,
 	}
 

@@ -214,6 +214,106 @@ crud_db=# SELECT * FROM schema_migrations;
 - is very dangerous to drop all table from production database
 - so we use m.Step(-1)`
 
+# Prevent Zombie Queries using Context
+
+- Create the issues
+  Step 1 : add pg_sleep(20) in query
+  Step 2 : Hit from server and cencel the request
+  Step 3 : run below command and see still client request is executing in database but client already cancel the request
+- this will create server crash issues if their is lot of clients
+
+## command to check list of active query in Database
+
+```sql
+SELECT
+    pid,
+    state,
+    now() - query_start AS duration,
+    wait_event,
+    query
+FROM pg_stat_activity
+WHERE query ILIKE '%pg_sleep%';
+```
+
+- Go give feature to use `context` than this signal is passed to query (client is already cancel the request so stop this query which are running in background)
+
+## User context
+
+```go
+
+```
+
+```go
+rows, err := db.Query(query)
+```
+
+# Folder Architecture in GO
+
+1. Package-by-Feature / Domain-Driven (Recommended)
+
+```go
+project-root/
+├── cmd/
+│   └── api/
+│       └── main.go           // Entry point & dependency injection
+├── internal/
+│   ├── user/                // Everything user-related lives here
+│   │   ├── entity.go        // DB Struct / Domain Entity
+│   │   ├── dto.go           // Request / Response Structs
+│   │   ├── handler.go       // HTTP Handler / Controller
+│   │   ├── service.go       // Business Logic
+│   │   ├── repository.go    // DB Queries
+│   │   └── router.go        // HTTP Endpoints
+│   ├── order/               // Everything order-related lives here
+│   │   ├── entity.go
+│   │   ├── dto.go
+│   │   ├── handler.go
+│   │   ├── service.go
+│   │   └── repository.go
+│   └── platform/            // Shared cross-cutting concerns
+│       ├── database/        // Connection pools (PostgreSQL, Redis)
+│       └── logger/          // Logging setup (slog/zap)
+├── pkg/                     // Generic utility packages (JWT, Crypto)
+├── go.mod
+└── go.sum
+```
+
+2. Layered Architecture (Package-by-Layer)
+
+```go
+project-root/
+├── cmd/
+│   └── api/
+│       └── main.go
+├── internal/
+│   ├── handlers/            // All HTTP handlers
+│   │   ├── user.go
+│   │   └── order.go
+│   ├── services/            // All business logic
+│   │   ├── user.go
+│   │   └── order.go
+│   ├── repositories/        // All database queries
+│   │   ├── user.go
+│   │   └── order.go
+│   └── models/              // All shared structs & DTOs
+│       ├── user.go
+│       └── order.go
+├── go.mod
+└── go.sum
+```
+
+3. Flat / Single-Package Structure
+4. Clean / Hexagonal Architecture (Ports & Adapters)
+
+| Architecture Style     | Refactoring Effort | Circular Import Risk | Recommended Team Size     |
+| ---------------------- | ------------------ | -------------------- | ------------------------- |
+| **Flat Structure**     | Hard               | None                 | 1 Developer               |
+| **Layered Structure**  | Medium             | High                 | Small Teams (1–3)         |
+| **Package-by-Feature** | Easy               | Very Low             | Small to Large Teams (3+) |
+| **Clean / Hexagonal**  | Medium             | None                 | Enterprise Teams          |
+
+- In this project we using `Package-by-Feature`
+
 # Project Flow
 
 ## `Step 1` → PostgreSQL connection

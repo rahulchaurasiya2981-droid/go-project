@@ -1,26 +1,28 @@
 package main
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/rahulchaurasiya2981-droid/go-crud-api/internal/config"
 	"github.com/rahulchaurasiya2981-droid/go-crud-api/internal/database"
+	"github.com/rahulchaurasiya2981-droid/go-crud-api/internal/health"
 	"github.com/rahulchaurasiya2981-droid/go-crud-api/internal/logger"
+	"github.com/rahulchaurasiya2981-droid/go-crud-api/internal/user"
 )
 
-
-
-
-
 func main() {
-	// # Step 1: Set our custom logger as default logger
+	// =========================================================
+	// STEP 1: Initialize Logger
+	// =========================================================
 	appLogger := logger.New("development")
 	slog.SetDefault(appLogger)
 
-	// # Step 2: Load Configuration
+	// =========================================================
+	// STEP 2: Load Configuration
+	// =========================================================
 	slog.Info(
 		logger.MsgConfigLoadStart,
 		"action", logger.ActionConfigLoadStart,
@@ -47,7 +49,9 @@ func main() {
 	port := cfg.Port
 	appEnv := cfg.AppEnv
 
-	// # Step 3: Connect to Database
+	// =========================================================
+	// STEP 3: Connect to Database
+	// =========================================================
 	db, err := database.ConnectDB(cfg.Database)
 	if err != nil {
 		slog.Error(
@@ -60,33 +64,37 @@ func main() {
 	}
 	defer db.Close()
 
+	healthHandler := health.NewHandler(db)
+	userRepository := user.NewRepository(db)
+	userService := user.NewService(userRepository)
+	userHandler := user.NewHandler(userService)
 
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	// =========================================================================
+	// STEP 4: Create HTTP Router & Register Routes with respective handlers
+	// =========================================================================
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /healthz/live", healthHandler.Liveness)
+	mux.HandleFunc("GET /healthz/ready", healthHandler.Readiness)
+	mux.HandleFunc("GET /users", userHandler.GetUsers)
+	mux.HandleFunc("POST /users", userHandler.CreateUser)
+	// mux.HandleFunc("DELETE /users/{id}", userHandler.DeleteUser)
+	// mux.HandleFunc("PUT /users/{id}", userHandler.UpdateUser)
 
-		slog.Info(
-			logger.MsgHTTPRequest,
-			"action", logger.ActionHTTPRequest,
-			"method", r.Method,
-			"path", r.URL.Path,
-		)
+	// =========================================================
+	// STEP 5: Create HTTP Server
+	// =========================================================
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+	server := &http.Server{
+		Addr:         port,
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
 
-		response := map[string]string{
-			"status":  "healthy",
-			"message": "API is running",
-		}
-
-		if err := json.NewEncoder(w).Encode(response); err != nil {
-			slog.Error(
-				logger.MsgHTTPRequestError,
-				"action", logger.ActionHTTPRequestError,
-				"error", err,
-			)
-		}
-	})
-
+	// =========================================================
+	// STEP 6: Start HTTP Server
+	// =========================================================
 	slog.Info(
 		logger.MsgServerStarted,
 		"action", logger.ActionServerStarted,
@@ -94,7 +102,8 @@ func main() {
 		"environment", appEnv,
 	)
 
-	if err := http.ListenAndServe(port, nil); err != nil {
+	err = server.ListenAndServe()
+	if err != nil {
 		slog.Error(
 			logger.MsgServerStopped,
 			"action", logger.ActionServerStopped,
@@ -104,4 +113,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-

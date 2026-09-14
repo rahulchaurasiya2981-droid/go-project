@@ -48,6 +48,23 @@ tasks:
       - go vet ./...
       - go test ./...
 
+  # DB command (Run in poweshell)
+  db-start:
+    desc: Start PostgreSQL database service
+    cmds:
+      - net start postgresql-x64-18
+
+  db-stop:
+    desc: Stop PostgreSQL database service
+    cmds:
+      - net stop postgresql-x64-18
+
+  db-status:
+    desc: Check PostgreSQL database service status
+    cmds:
+      - sc query postgresql-x64-18
+
+  # Migration commands
   migrate-create:
     desc: Create a new migration
     cmds:

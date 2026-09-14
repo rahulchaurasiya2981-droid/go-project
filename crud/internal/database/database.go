@@ -31,7 +31,7 @@ func ConnectDB(dbConfig config.DatabaseConfig) (*sql.DB, error) {
 	db.SetConnMaxLifetime(dbConfig.ConnMaxLifetime) // Maximum lifetime of a DB connection
 	db.SetConnMaxIdleTime(dbConfig.ConnMaxIdleTime) // Maximum time a connection can stay idle
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // context deadline for pinging the database
 	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
